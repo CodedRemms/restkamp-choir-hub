@@ -240,7 +240,7 @@ const SCH = {
 };
 
 var sunDate = '', lineEdit = null;
-let tab = tabFromHash(), code = store.get('choirCode'), editor = true, loading = true, loadErr = '';
+let tab = (location.hash && history.replaceState(null, '', location.pathname + location.search), 'home'), code = store.get('choirCode'), editor = true, loading = true, loadErr = '';
 let items = {announcement:[], event:[], rota:[], rule:[], check:[]}, songs = [], roster = null;
 let form = null, toastMsg = '', cat = 'All', q = '', picked = [], checked = {}, attDate = todayISO(), attStatus = '', fresh = true;
 const timers = {};
@@ -349,7 +349,7 @@ function lineEditorV(){
     </div>`).join('') + `<div class="row" style="margin-top:12px"><button class="mini" data-act="le_addsec">+ Add section</button></div>
     <div class="row" style="margin-top:16px"><button class="btn" data-act="le_save" ${e.busy ? 'disabled' : ''}>${e.busy ? 'Saving…' : 'Save lineup'}</button><button class="btn alt" data-act="le_cancel">Cancel</button></div>`;
 }
-function readLE(){
+function readLE(){ if (lineEdit && lineEdit.dirty) { lineEdit.dirty = false; return; }
   if (!lineEdit) return;
   document.querySelectorAll('[data-lsec]').forEach(c => {
     const p = lineEdit.sections[+c.dataset.lsec]; if (!p) return;
@@ -362,7 +362,7 @@ async function lineAct(act, el){
   if (act === 'le_start') { lineEdit = {id: r.id, err: '', busy: false, sections: (r.lineup && r.lineup.length) ? JSON.parse(JSON.stringify(r.lineup)) : [{name:'Worship', lead:'', songs:[{t:'', yt:''}]}, {name:'Praise', lead:'', songs:[{t:'', yt:''}]}]}; render(); return; }
   if (!lineEdit) return;
   readLE();
-  const c = el.closest('[data-lsec]'), p = c ? lineEdit.sections[+c.dataset.lsec] : null;
+  lineEdit.dirty = true; const c = el.closest('[data-lsec]'), p = c ? lineEdit.sections[+c.dataset.lsec] : null;
   const row = el.closest('[data-lsong]'), j = row ? +row.dataset.lsong : -1;
   if (act === 'le_cancel') lineEdit = null;
   if (act === 'le_addsong') p.songs.push({t:'', yt:''});
@@ -617,7 +617,7 @@ app.addEventListener('keydown', e => {
 });
 app.addEventListener('input', e => { if (e.target.id === 'q') { q = e.target.value; $('#slist').innerHTML = songListV(); } });
 app.addEventListener('change', e => {
-  if (e.target.matches('[data-lpick]') && lineEdit && e.target.value) { readLE(); const s = songs.find(x => x.id === e.target.value); const p = lineEdit.sections[+e.target.closest('[data-lsec]').dataset.lsec]; if (s && p) { const blank = p.songs.findIndex(g => !g.t && !g.yt); const g = {t: s.title, yt: s.youtube_url || ''}; if (blank >= 0) p.songs[blank] = g; else p.songs.push(g); } render(); return; } if (e.target.id === 'ad' && e.target.value) { attDate = e.target.value; render(); } });
+  if (e.target.matches('[data-lpick]') && lineEdit && e.target.value) { readLE(); lineEdit.dirty = true; const s = songs.find(x => x.id === e.target.value); const p = lineEdit.sections[+e.target.closest('[data-lsec]').dataset.lsec]; if (s && p) { const blank = p.songs.findIndex(g => !g.t && !g.yt); const g = {t: s.title, yt: s.youtube_url || ''}; if (blank >= 0) p.songs[blank] = g; else p.songs.push(g); } render(); return; } if (e.target.id === 'ad' && e.target.value) { attDate = e.target.value; render(); } });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
 setInterval(() => { if (!document.hidden) load(); }, 90000);
 
