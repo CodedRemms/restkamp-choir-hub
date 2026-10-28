@@ -121,7 +121,7 @@ const SCH = {
 };
 const COLL = {announcement:'announcements', event:'events', rota:'roster entries', rule:'rules', check:'checks'};
 
-let tab = 'home', code = store.get('choirCode'), editor = false, loading = true, loadErr = '';
+let tab = 'home', code = store.get('choirCode'), editor = true, loading = true, loadErr = '';
 let items = {announcement:[], event:[], rota:[], rule:[], check:[]}, songs = [], roster = null;
 let form = null, toastMsg = '', cat = 'All', q = '', picked = [], checked = {}, attDate = todayISO(), attStatus = '';
 const timers = {};
@@ -259,7 +259,7 @@ function render(){
   const body = loading ? '<div class="empty">Loading...</div>' : (loadErr ? `<div class="empty">${esc(loadErr)}</div>` : {home:homeV, songs:songsV, rota:rotaV, rules:rulesV, att:attV}[tab]());
   $('#app').innerHTML = `<header><h1>${esc(CHOIR_NAME)}</h1><p>${esc(TAGLINE)}</p>
     <div class="row" style="margin-top:10px"><button class="mini" data-act="refresh">Refresh</button>
-    ${editor ? '<span class="tag">Editor</span><button class="mini" data-act="changecode">Change code</button><button class="mini" data-act="signout">Sign out</button>' : '<button class="mini" data-act="signin">Editor sign-in</button>'}</div></header>
+    </div></header>
     <main>${body}</main>
     <nav>${tabs.map(([k, i, l]) => `<button class="${tab === k ? 'on' : ''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>
     ${form ? formV() : ''}${toastMsg ? `<div class="toast" role="status">${esc(toastMsg)}</div>` : ''}`;
