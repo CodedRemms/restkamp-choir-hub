@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Choir Hub</title>
+<meta name="description" content="Songs, schedules, rules and announcements for our choir.">
+<meta property="og:title" content="Choir Hub">
+<meta property="og:description" content="Songs, schedules, rules and announcements for our choir.">
+<meta name="theme-color" content="#7a1f3d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B6%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f5f2f7;--card:#ffffff;--ink:#1f1630;--mut:#6a5f78;--pri:#7a1f3d;--pri-ink:#ffffff;--soft:#f4e3e9;--gold:#b8862b;--line:#e6dfec;--ok:#1f8a4c;--bad:#c23b3b;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root{--bg:#15101d;--card:#1f1830;--ink:#f2ecf7;--mut:#a99fb8;--pri:#e0708f;--pri-ink:#1b0d14;--soft:#3a1f2e;--gold:#e0b25a;--line:#342a47;--ok:#4cc27f;--bad:#ef7a7a}}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding-top:env(safe-area-inset-top,0px);background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:Fraunces,Georgia,"Times New Roman",serif;margin:0;line-height:1.2}
+main{max-width:640px;margin:0 auto;padding:14px 14px 120px}
+header{max-width:640px;margin:0 auto;padding:18px 14px 4px}
+header h1{font-size:26px;color:var(--pri)}
+header p{margin:2px 0 0;color:var(--mut);font-size:14px}
+.sec{margin:22px 0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sec h2{font-size:19px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 10px}
+.card h3{font-size:17px;margin-bottom:4px}
+.mut{color:var(--mut);font-size:14px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.hero{background:var(--pri);color:var(--pri-ink);border-radius:18px;padding:18px 18px 16px;margin-top:10px}
+.hero h2{font-size:22px;margin:2px 0 8px}
+.hero .mut{color:inherit;opacity:.85}
+.hero dl{margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:15px}
+.hero dt{opacity:.8}.hero dd{margin:0;font-weight:600}
+.pin{border-left:4px solid var(--gold)}
+.aop{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:2px solid var(--gold);border-radius:18px;padding:16px 18px;margin-top:12px}
+.aop small{display:block;color:var(--gold);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.aop strong{display:block;font-family:Fraunces,Georgia,serif;font-size:21px;margin:2px 0}
+.aop span{color:var(--mut);font-size:14px;font-weight:500}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 14px;background:var(--pri);color:var(--pri-ink);cursor:pointer;text-decoration:none;display:inline-block}
+.btn[disabled]{opacity:.6;cursor:default}
+.btn.alt{background:var(--soft);color:var(--pri)}
+.btn.bad{background:var(--bad);color:#fff}
+.mini{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:8px;padding:4px 10px;cursor:pointer}
+.chip{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 13px;cursor:pointer}
+.chip.on{background:var(--pri);color:var(--pri-ink);border-color:var(--pri)}
+.tag{font-size:12px;background:var(--soft);color:var(--pri);border-radius:6px;padding:2px 8px;font-weight:600}
+input,textarea,select{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+label{display:block;font-size:14px;font-weight:600;margin:12px 0 4px}
+label.ck{display:flex;gap:10px;align-items:center;font-weight:500}
+label.ck input{width:20px;height:20px}
+details.card summary{cursor:pointer;font-weight:600;list-style:none}
+details.card summary::-webkit-details-marker{display:none}
+details.card[open] summary{color:var(--pri);margin-bottom:6px}
+.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .25s}
+.chk{display:flex;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.chk:last-child{border:0}
+.box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;flex:none;font-size:15px;color:#fff}
+.chk.on .box{background:var(--ok);border-color:var(--ok)}
+.chk.on span{color:var(--mut);text-decoration:line-through}
+.att{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border:1px solid var(--line);background:var(--card);border-radius:12px;margin-bottom:8px;cursor:pointer;width:100%;font:inherit;color:inherit;text-align:left}
+.att b{font-size:13px;border-radius:8px;padding:3px 10px;background:var(--line);color:var(--mut)}
+.att.p b{background:var(--ok);color:#fff}.att.l b{background:var(--gold);color:#fff}.att.a b{background:var(--bad);color:#fff}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;max-width:110px;font:inherit;font-size:12px;font-weight:600;background:none;border:0;color:var(--mut);padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button span{font-size:20px}
+nav button.on{color:var(--pri)}
+.modal{position:fixed;inset:0;background:rgba(10,5,20,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:14px;z-index:30;max-width:90%;text-align:center}
+.empty{text-align:center;color:var(--mut);padding:22px 10px;border:1px dashed var(--line);border-radius:14px}
+.err{color:var(--bad);font-size:14px;margin-top:10px}
+.hint{color:var(--mut);font-size:13px;margin-top:4px}
+a{color:var(--pri);font-weight:600}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const SB = 'https://kuubzlcggvvmuldasmzu.supabase.co';
+const KEY = 'sb_publishable_tILHIHGE0jnhrr7y26yBAw_aSCqZZke';
+const AOP_URL = 'https://restkamp-aop-2026.vercel.app', AOP_UNTIL = '2026-12-31';
+const CHOIR_NAME = 'RESTKAMP Choir', TAGLINE = 'Songs, schedules, rules and announcements';
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isoOf = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const todayISO = () => isoOf(new Date());
+const fmt = d => d ? new Date(d + 'T00:00:00').toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}) : '';
+const store = { get: k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }, set: (k, v) => { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} } };
+
+async function api(path, opts = {}) {
+  const r = await fetch(SB + '/rest/v1/' + path, {...opts, headers: {apikey: KEY, 'Content-Type': 'application/json', ...(opts.headers || {})}});
+  if (!r.ok) { let m = ''; try { m = (await r.json()).message; } catch (e) {} throw new Error(m || ('Request failed (' + r.status + ')')); }
+  return (r.headers.get('content-type') || '').includes('json') ? r.json() : null;
+}
+const rpc = (fn, args) => api('rpc/' + fn, {method: 'POST', body: JSON.stringify(args)});
+async function ed(fn, args = {}) {
+  const r = await rpc(fn, {p_code: code, ...args});
+  if (r && r.ok === false) { if (/code/i.test(r.error || '')) { editor = false; code = ''; store.set('choirCode', ''); } throw new Error(r.error || 'Not allowed'); }
+  return r;
+}
+
+const KINDS = ['announcement', 'event', 'rota', 'rule', 'check'];
+const SCH = {
+  announcement: {label:'announcement', req:['title'], fields:[['title','Title *'],['body','Details','textarea'],['date','Date','date'],['pin','Pin to top','check']]},
+  event: {label:'activity', req:['title','date'], fields:[['title','What is happening *'],['date','Date *','date'],['time','Time (e.g. 7:00 PM)'],['place','Place'],['notes','Notes','textarea']]},
+  rota: {label:'schedule entry', req:['date'], fields:[['date','Date *','date'],['service','Service or event'],['lead','Lead(s)'],['uniform','Uniform'],['notes','Notes','textarea']]},
+  rotabulk: {label:'quarterly schedule', req:['lines'], fields:[['lines','Dates, one per line *','textarea',null,'Format: 2026-11-01 | Sunday service | Lead name | Uniform']]},
+  rule: {label:'rule', req:['title'], fields:[['title','Rule *'],['body','Details','textarea']]},
+  check: {label:'check item', req:['text'], fields:[['text','Check item *']]},
+  song: {label:'song', req:['title'], fields:[['title','Song title *'],['type','Type','select',['Worship','Praise','Hymn','Special','Opening','Closing']],['musical_key','Key (e.g. G)'],['youtube_url','YouTube link','text',null,'Paste the full link, starting with https://'],['notes','Notes (who it suits, tempo, etc.)','textarea'],['added_by','Your name (optional)']]},
+  members: {label:'members', req:['names'], fields:[['names','Names, one per line *','textarea']]},
+  member: {label:'member', req:['name'], fields:[['name','Name *']]},
+  code: {label:'editor code', req:['new_code'], fields:[['new_code','New editor code (at least 6 characters) *']]},
+  signin: {label:'editor sign-in', req:['code'], fields:[['code','Editor code *']]}
+};
+const COLL = {announcement:'announcements', event:'events', rota:'roster entries', rule:'rules', check:'checks'};
+
+let tab = 'home', code = store.get('choirCode'), editor = false, loading = true, loadErr = '';
+let items = {announcement:[], event:[], rota:[], rule:[], check:[]}, songs = [], roster = null;
+let form = null, toastMsg = '', cat = 'All', q = '', picked = [], checked = {}, attDate = todayISO(), attStatus = '';
+const timers = {};
+
+function toast(m){ toastMsg = m; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { toastMsg = ''; render(); }, 2800); }
+const ytUrl = s => s.youtube_url || ('https://www.youtube.com/results?search_query=' + encodeURIComponent(s.title + ' worship'));
+const addBtn = (k, t) => editor ? `<button class="mini" data-act="add" data-c="${k}">+ ${t}</button>` : '';
+const editBtn = (k, id) => editor ? `<button class="mini" data-act="edit" data-c="${k}" data-id="${id}">Edit</button>` : '';
+
+async function load(){
+  try {
+    const [it, so] = await Promise.all([api('items?select=id,kind,data,created_at&order=created_at.desc'), api('songs?select=*&order=title.asc')]);
+    const n = {announcement:[], event:[], rota:[], rule:[], check:[]};
+    it.forEach(r => { if (n[r.kind]) n[r.kind].push({...r.data, id: r.id}); });
+    n.rule.reverse(); n.check.reverse();
+    items = n; songs = so; loadErr = '';
+  } catch (e) { loadErr = 'Could not load. Check your connection, then tap Refresh.'; }
+  loading = false;
+  const a = document.activeElement;
+  if (!form && !(a && ['INPUT','TEXTAREA','SELECT'].includes(a.tagName))) render();
+}
+async function loadRoster(){
+  try { const r = await ed('editor_get_roster'); roster = {members: r.members, attendance: r.attendance}; }
+  catch (e) { toast(e.message); }
+  render();
+}
+
+function homeV(){
+  const nextR = items.rota.filter(r => r.date >= todayISO()).sort((a,b) => a.date.localeCompare(b.date))[0];
+  const ann = [...items.announcement].sort((a,b) => ((b.pin ? 1 : 0) - (a.pin ? 1 : 0)) || String(b.date || '').localeCompare(String(a.date || '')));
+  const ev = items.event.filter(e => e.date >= todayISO()).sort((a,b) => a.date.localeCompare(b.date));
+  const aop = todayISO() <= AOP_UNTIL ? `<a class="aop" href="${AOP_URL}"><small>29 – 31 December</small><strong>Assemblies of Praise 2026 →</strong><span>Daily lineups, ministrations and uniforms</span></a>` : '';
+  return `${aop}
+  ${nextR ? `<section class="hero"><div class="mut">Next ministration</div><h2>${esc(nextR.service) || 'Service'}</h2><div>${fmt(nextR.date)}</div>
+    <dl><dt>Lead</dt><dd>${esc(nextR.lead) || 'To be announced'}</dd><dt>Uniform</dt><dd>${esc(nextR.uniform) || 'To be announced'}</dd></dl></section>` : ''}
+  <div class="sec"><h2>Announcements</h2>${addBtn('announcement','Add')}</div>
+  ${ann.map(a => `<div class="card ${a.pin ? 'pin' : ''}"><div class="spread"><h3>${esc(a.title)}</h3>${editBtn('announcement', a.id)}</div>
+    <div class="mut">${fmt(a.date)}${a.pin ? (a.date ? ' · ' : '') + 'Pinned' : ''}</div>${a.body ? `<p style="margin:8px 0 0;white-space:pre-wrap">${esc(a.body)}</p>` : ''}</div>`).join('') || '<div class="empty">No announcements yet.</div>'}
+  <div class="sec"><h2>Upcoming activities</h2>${addBtn('event','Add')}</div>
+  ${ev.map(e => `<div class="card"><div class="spread"><h3>${esc(e.title)}</h3>${editBtn('event', e.id)}</div>
+    <div class="mut">${fmt(e.date)}${e.time ? ' at ' + esc(e.time) : ''}${e.place ? ' · ' + esc(e.place) : ''}</div>${e.notes ? `<div style="margin-top:6px;white-space:pre-wrap">${esc(e.notes)}</div>` : ''}</div>`).join('') || '<div class="empty">Nothing scheduled yet.</div>'}`;
+}
+
+function songListV(){
+  const list = songs.filter(s => (cat === 'All' || s.type === cat) && (s.title + ' ' + (s.notes || '')).toLowerCase().includes(q.toLowerCase()));
+  return list.map(s => `<div class="card"><div class="spread"><div><h3>${esc(s.title)}</h3>
+    <div class="row"><span class="tag">${esc(s.type)}</span>${s.musical_key ? `<span class="mut">Key ${esc(s.musical_key)}</span>` : ''}</div>
+    ${s.notes ? `<div class="mut" style="margin-top:4px">${esc(s.notes)}</div>` : ''}
+    ${s.added_by && s.added_by !== 'Sample' ? `<div class="hint">Added by ${esc(s.added_by)}</div>` : ''}</div>${editBtn('song', s.id)}</div>
+    <div class="row" style="margin-top:10px"><a class="btn alt" href="${esc(ytUrl(s))}" target="_blank" rel="noopener">${s.youtube_url ? 'Watch on YouTube' : 'Find on YouTube'}</a>
+    <button class="btn ${picked.includes(s.id) ? '' : 'alt'}" data-act="pick" data-id="${s.id}">${picked.includes(s.id) ? 'In lineup' : 'Add to lineup'}</button></div></div>`).join('') || '<div class="empty">No songs match.</div>';
+}
+function lineupText(){
+  return 'Ministration lineup\n' + picked.map((id,i) => { const s = songs.find(x => x.id === id); return s ? `${i+1}. ${s.title}${s.musical_key ? ' (Key ' + s.musical_key + ')' : ''}\n${ytUrl(s)}` : ''; }).join('\n');
+}
+function songsV(){
+  const cats = ['All', ...new Set(songs.map(s => s.type))];
+  return `
+  <div class="sec"><h2>Song bank</h2><button class="btn" data-act="add" data-c="song">+ Add a song</button></div>
+  <div class="hint" style="margin:-4px 0 10px">Anyone in the choir can add a song.</div>
+  <input id="q" type="search" placeholder="Search songs" value="${esc(q)}" aria-label="Search songs">
+  <div class="row" style="margin:10px 0">${cats.map(c => `<button class="chip ${cat === c ? 'on' : ''}" data-act="cat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+  ${picked.length ? `<div class="card pin"><h3>Today's lineup</h3>${picked.map((id,i) => { const s = songs.find(x => x.id === id); return s ? `<div class="spread" style="padding:4px 0"><span>${i+1}. ${esc(s.title)}</span><button class="mini" data-act="pick" data-id="${id}">Remove</button></div>` : ''; }).join('')}
+    <div class="row" style="margin-top:10px"><button class="btn" data-act="copy">Copy lineup</button>
+    <a class="btn alt" href="https://wa.me/?text=${encodeURIComponent(lineupText())}" target="_blank" rel="noopener">Send on WhatsApp</a>
+    <button class="mini" data-act="clearlineup">Clear</button></div></div>` : ''}
+  <div id="slist">${songListV()}</div>`;
+}
+
+function rotaV(){
+  const up = items.rota.filter(r => r.date >= todayISO()).sort((a,b) => a.date.localeCompare(b.date));
+  const past = items.rota.filter(r => r.date < todayISO()).sort((a,b) => b.date.localeCompare(a.date));
+  const card = r => `<div class="card"><div class="spread"><div><h3>${fmt(r.date)}</h3><div class="mut">${esc(r.service)}</div></div>${editBtn('rota', r.id)}</div>
+    <div style="margin-top:8px"><b>Lead:</b> ${esc(r.lead) || '-'}<br><b>Uniform:</b> ${esc(r.uniform) || '-'}</div>${r.notes ? `<div class="mut" style="margin-top:6px;white-space:pre-wrap">${esc(r.notes)}</div>` : ''}</div>`;
+  return `<div class="sec"><h2>Schedule</h2><div class="row">${addBtn('rotabulk','Quarter')}${addBtn('rota','Date')}</div></div>
+  ${up.map(card).join('') || '<div class="empty">No upcoming dates yet.</div>'}
+  ${past.length ? `<details><summary class="mut" style="cursor:pointer;margin:12px 0">Past dates (${past.length})</summary>${past.map(card).join('')}</details>` : ''}`;
+}
+
+function rulesV(){
+  const done = items.check.filter(c => checked[c.id]).length, n = items.check.length;
+  return `<div class="sec"><h2>Quick check</h2>${addBtn('check','Add item')}</div>
+  <div class="card">${items.check.map(c => `<div class="chk ${checked[c.id] ? 'on' : ''}" data-act="check" data-id="${c.id}" role="checkbox" aria-checked="${!!checked[c.id]}" tabindex="0"><div class="box">${checked[c.id] ? '✓' : ''}</div><span style="flex:1">${esc(c.text)}</span>${editBtn('check', c.id)}</div>`).join('') || '<div class="mut">No check items yet.</div>'}
+    <div class="bar"><i style="width:${n ? done / n * 100 : 0}%"></i></div>
+    <div class="spread"><span class="mut">${done} of ${n} ready${n && done === n ? ' - you are good to go' : ''}</span><button class="mini" data-act="resetcheck">Reset</button></div></div>
+  <div class="sec"><h2>Choir rules</h2>${addBtn('rule','Add rule')}</div>
+  ${items.rule.map(r => `<details class="card"><summary>${esc(r.title)}</summary><div style="white-space:pre-wrap">${esc(r.body)}</div>${editor ? `<div style="margin-top:8px">${editBtn('rule', r.id)}</div>` : ''}</details>`).join('') || '<div class="empty">No rules added yet.</div>'}`;
+}
+
+function attV(){
+  if (!roster) return '<div class="empty">Loading attendance...</div>';
+  const rec = roster.attendance[attDate] || {};
+  const lab = {p:'Present', l:'Late', a:'Absent'};
+  const cnt = k => roster.members.filter(m => rec[m.id] === k).length;
+  const dates = Object.keys(roster.attendance);
+  return `<div class="sec"><h2>Rehearsal attendance</h2>${addBtn('members','Add members')}</div>
+  <label for="ad" style="margin-top:0">Rehearsal date</label><input id="ad" type="date" value="${attDate}">
+  ${roster.members.length ? `<div class="row" style="margin:12px 0"><span class="tag">Present ${cnt('p')}</span><span class="tag">Late ${cnt('l')}</span><span class="tag">Absent ${cnt('a')}</span>
+    <button class="mini" data-act="allpresent">Mark all present</button><span class="hint">${esc(attStatus)}</span></div>
+    ${roster.members.map(m => `<button class="att ${rec[m.id] || ''}" data-act="att" data-id="${m.id}"><span>${esc(m.name)}</span><b>${lab[rec[m.id]] || 'Tap to mark'}</b></button>`).join('')}
+    <p class="mut">Tap a name to cycle: present, late, absent.</p>
+    ${dates.length ? `<div class="sec"><h2>Overall attendance</h2></div><div class="card">${roster.members.map(m => { const p = dates.filter(d => ['p','l'].includes((roster.attendance[d] || {})[m.id])).length; const pct = Math.round(p / dates.length * 100);
+      return `<div class="spread" style="padding:5px 0"><span>${esc(m.name)} ${editBtn('member', m.id)}</span><b>${pct}%</b></div>`; }).join('')}
+      <div class="mut">Across ${dates.length} rehearsal${dates.length > 1 ? 's' : ''}</div></div>` : ''}`
+    : '<div class="empty" style="margin-top:12px">Add your choir members to start taking attendance.</div>'}`;
+}
+
+function formV(){
+  const k = form.c, id = form.id, sch = SCH[k];
+  let item = form.vals;
+  if (!item) {
+    if (id) item = k === 'song' ? songs.find(x => x.id === id) : k === 'member' ? roster.members.find(x => x.id === id) : items[k].find(x => x.id === id);
+    else item = {type:'Worship', date: todayISO()};
+  }
+  item = item || {};
+  const f = sch.fields.filter(x => !(x[0] === 'added_by' && id)).map(([n, lbl, t, opts, help]) => {
+    const v = item[n] ?? '';
+    const h = help ? `<div class="hint">${esc(help)}</div>` : '';
+    if (t === 'textarea') return `<label for="f_${n}">${lbl}</label><textarea id="f_${n}" name="${n}">${esc(v)}</textarea>${h}`;
+    if (t === 'check') return `<label class="ck"><input type="checkbox" name="${n}" ${v ? 'checked' : ''}> ${lbl}</label>`;
+    if (t === 'select') return `<label for="f_${n}">${lbl}</label><select id="f_${n}" name="${n}">${opts.map(o => `<option ${o === v ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
+    return `<label for="f_${n}">${lbl}</label><input id="f_${n}" name="${n}" type="${t === 'date' ? 'date' : 'text'}" value="${esc(v)}" ${n === 'code' ? 'type="password" autocomplete="off"' : ''}>${h}`;
+  }).join('');
+  const title = k === 'signin' || k === 'code' ? sch.label.charAt(0).toUpperCase() + sch.label.slice(1) : (id ? 'Edit ' : 'Add ') + sch.label;
+  const canDelete = id && ['song','member', ...KINDS].includes(k);
+  return `<div class="modal" data-act="closeform"><div class="sheet" id="frm"><h2>${title}</h2>${f}${form.err ? `<div class="err" role="alert">${esc(form.err)}</div>` : ''}
+    <div class="row" style="margin-top:18px"><button class="btn" data-act="saveform" ${form.busy ? 'disabled' : ''}>${form.busy ? 'Saving...' : (k === 'signin' ? 'Sign in' : 'Save')}</button><button class="btn alt" data-act="closeform">Cancel</button>
+    ${canDelete ? `<button class="btn bad" data-act="delitem" style="margin-left:auto" ${form.busy ? 'disabled' : ''}>${form.sure ? 'Tap again to delete' : 'Delete'}</button>` : ''}</div></div></div>`;
+}
+
+function render(){
+  const y = window.scrollY;
+  const tabs = [['home','🏠','Home'],['songs','🎵','Songs'],['rota','📅','Schedule'],['rules','✅','Rules']];
+  if (editor) tabs.push(['att','🧾','Attendance']);
+  const body = loading ? '<div class="empty">Loading...</div>' : (loadErr ? `<div class="empty">${esc(loadErr)}</div>` : {home:homeV, songs:songsV, rota:rotaV, rules:rulesV, att:attV}[tab]());
+  $('#app').innerHTML = `<header><h1>${esc(CHOIR_NAME)}</h1><p>${esc(TAGLINE)}</p>
+    <div class="row" style="margin-top:10px"><button class="mini" data-act="refresh">Refresh</button>
+    ${editor ? '<span class="tag">Editor</span><button class="mini" data-act="changecode">Change code</button><button class="mini" data-act="signout">Sign out</button>' : '<button class="mini" data-act="signin">Editor sign-in</button>'}</div></header>
+    <main>${body}</main>
+    <nav>${tabs.map(([k, i, l]) => `<button class="${tab === k ? 'on' : ''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>
+    ${form ? formV() : ''}${toastMsg ? `<div class="toast" role="status">${esc(toastMsg)}</div>` : ''}`;
+  window.scrollTo(0, y);
+}
+
+async function copyText(t){
+  try { await navigator.clipboard.writeText(t); toast('Lineup copied'); }
+  catch (e) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('Lineup copied'); } catch (_) { toast('Could not copy. Use the WhatsApp button instead.'); } ta.remove(); }
+}
+
+async function doSave(v){
+  const {c, id} = form;
+  if (c === 'signin') {
+    const ok = await rpc('verify_editor', {p_code: v.code});
+    if (ok !== true) throw new Error('That code did not work. Check it and try again.');
+    code = v.code; editor = true; store.set('choirCode', code); return 'Signed in as editor';
+  }
+  if (c === 'code') {
+    await ed('editor_change_code', {p_new: v.new_code});
+    code = v.new_code; store.set('choirCode', code); return 'Editor code changed. Share the new code with your editors.';
+  }
+  if (c === 'song') {
+    if (v.youtube_url && !/^https:\/\/(www\.|m\.|music\.)?(youtube\.com|youtu\.be)\//i.test(v.youtube_url)) throw new Error('Use a full YouTube link starting with https://');
+    const row = {title: v.title, type: v.type, musical_key: v.musical_key || null, notes: v.notes || null, youtube_url: v.youtube_url || null};
+    if (id) await ed('editor_save_song', {p_id: id, p_title: row.title, p_type: row.type, p_key: v.musical_key || '', p_notes: v.notes || '', p_url: v.youtube_url || ''});
+    else { row.added_by = v.added_by || null; await api('songs', {method: 'POST', headers: {Prefer: 'return=minimal'}, body: JSON.stringify(row)}); }
+    await load(); return id ? 'Song updated' : 'Song added';
+  }
+  if (c === 'members') {
+    for (const n of v.names.split('\n').map(s => s.trim()).filter(Boolean)) await ed('editor_save_member', {p_id: null, p_name: n});
+    await loadRoster(); return 'Members added';
+  }
+  if (c === 'member') { await ed('editor_save_member', {p_id: id, p_name: v.name}); await loadRoster(); return 'Saved'; }
+  if (c === 'rotabulk') {
+    const rows = [], bad = [];
+    v.lines.split('\n').map(s => s.trim()).filter(Boolean).forEach(l => {
+      const p = l.split('|').map(x => x.trim());
+      if (/^\d{4}-\d{2}-\d{2}$/.test(p[0] || '')) rows.push({date: p[0], service: p[1] || 'Service', lead: p[2] || '', uniform: p[3] || '', notes: p[4] || ''}); else bad.push(l);
+    });
+    if (bad.length) throw new Error('Check these lines. The date must look like 2026-11-01: ' + bad.slice(0, 3).join(' / '));
+    for (const r of rows) await ed('editor_save_item', {p_id: null, p_kind: 'rota', p_data: r});
+    await load(); return rows.length + ' dates added';
+  }
+  await ed('editor_save_item', {p_id: id || null, p_kind: c, p_data: v});
+  await load(); return 'Saved';
+}
+
+async function saveForm(){
+  const v = {};
+  document.querySelectorAll('#frm [name]').forEach(el => v[el.name] = el.type === 'checkbox' ? el.checked : el.value.trim());
+  form.vals = v; form.err = '';
+  if ((SCH[form.c].req || []).some(k => !v[k])) { form.err = 'Please fill in the fields marked *.'; render(); return; }
+  form.busy = true; render();
+  try { const msg = await doSave(v); form = null; toastMsg = msg; clearTimeout(toast.t); toast.t = setTimeout(() => { toastMsg = ''; render(); }, 2800); }
+  catch (e) { form.busy = false; form.err = e.message; }
+  render();
+}
+
+async function delItem(){
+  if (!form.sure) { form.sure = true; render(); return; }
+  const {c, id} = form; form.busy = true; render();
+  try {
+    if (c === 'song') await ed('editor_delete_song', {p_id: id});
+    else if (c === 'member') await ed('editor_delete_member', {p_id: id});
+    else await ed('editor_delete_item', {p_id: id});
+    form = null; if (c === 'member') await loadRoster(); else await load();
+    toast('Deleted');
+  } catch (e) { form.busy = false; form.sure = false; form.err = e.message; render(); }
+}
+
+function queueSave(day){
+  attStatus = 'Saving...'; clearTimeout(timers[day]);
+  timers[day] = setTimeout(async () => {
+    try { await ed('editor_set_attendance', {p_day: day, p_marks: roster.attendance[day] || {}}); attStatus = 'Saved'; }
+    catch (e) { attStatus = 'Not saved: ' + e.message; }
+    render();
+  }, 500);
+}
+
+const A = {
+  tab: d => { tab = d.v; if (tab === 'att' && !roster) loadRoster(); },
+  refresh: () => { loading = true; render(); load(); if (editor && roster) loadRoster(); return 'skip'; },
+  signin: () => { form = {c: 'signin'}; },
+  signout: () => { editor = false; code = ''; store.set('choirCode', ''); roster = null; if (tab === 'att') tab = 'home'; },
+  changecode: () => { form = {c: 'code'}; },
+  add: d => { form = {c: d.c, id: null}; },
+  edit: d => { form = {c: d.c, id: d.id}; },
+  closeform: () => { if (form && form.busy) return 'skip'; form = null; },
+  saveform: () => { saveForm(); return 'skip'; },
+  delitem: () => { delItem(); return 'skip'; },
+  cat: d => { cat = d.v; },
+  pick: d => { picked = picked.includes(d.id) ? picked.filter(x => x !== d.id) : [...picked, d.id]; },
+  clearlineup: () => { picked = []; },
+  copy: () => { copyText(lineupText()); return 'skip'; },
+  check: d => { checked[d.id] = !checked[d.id]; },
+  resetcheck: () => { checked = {}; },
+  att: d => {
+    const r = roster.attendance[attDate] = roster.attendance[attDate] || {};
+    const next = {undefined:'p', p:'l', l:'a', a:undefined}[r[d.id]];
+    if (next) r[d.id] = next; else delete r[d.id];
+    if (!Object.keys(r).length) delete roster.attendance[attDate];
+    queueSave(attDate);
+  },
+  allpresent: () => {
+    const r = roster.attendance[attDate] = {};
+    roster.members.forEach(m => r[m.id] = 'p'); queueSave(attDate);
+  }
+};
+
+const app = $('#app');
+app.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if (!t || (t.classList.contains('modal') && e.target !== t) || t.tagName === 'A') return;
+  if (A[t.dataset.act]?.(t.dataset) !== 'skip') render();
+});
+app.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('chk')) { e.preventDefault(); e.target.click(); }
+  if (e.key === 'Enter' && form && e.target.tagName === 'INPUT') { e.preventDefault(); saveForm(); }
+});
+app.addEventListener('input', e => { if (e.target.id === 'q') { q = e.target.value; $('#slist').innerHTML = songListV(); } });
+app.addEventListener('change', e => { if (e.target.id === 'ad' && e.target.value) { attDate = e.target.value; render(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+setInterval(() => { if (!document.hidden) load(); }, 90000);
+
+render();
+load();
+if (code) rpc('verify_editor', {p_code: code}).then(ok => { if (ok === true) { editor = true; } else { code = ''; store.set('choirCode', ''); } render(); }).catch(() => {});
+</script>
+</body>
+</html>
