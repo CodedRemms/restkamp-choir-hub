@@ -243,7 +243,7 @@ function formV(){
     if (t === 'textarea') return `<label for="f_${n}">${lbl}</label><textarea id="f_${n}" name="${n}">${esc(v)}</textarea>${h}`;
     if (t === 'check') return `<label class="ck"><input type="checkbox" name="${n}" ${v ? 'checked' : ''}> ${lbl}</label>`;
     if (t === 'select') return `<label for="f_${n}">${lbl}</label><select id="f_${n}" name="${n}">${opts.map(o => `<option ${o === v ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
-    return `<label for="f_${n}">${lbl}</label><input id="f_${n}" name="${n}" type="${t === 'date' ? 'date' : 'text'}" value="${esc(v)}" ${n === 'code' ? 'type="password" autocomplete="off"' : ''}>${h}`;
+    return `<label for="f_${n}">${lbl}</label><input id="f_${n}" name="${n}" type="${t === 'date' ? 'date' : n === 'code' || n === 'new_code' ? 'password' : 'text'}" value="${esc(v)}" ${n === 'code' ? 'type="password" autocomplete="off"' : ''}>${h}`;
   }).join('');
   const title = k === 'signin' || k === 'code' ? sch.label.charAt(0).toUpperCase() + sch.label.slice(1) : (id ? 'Edit ' : 'Add ') + sch.label;
   const canDelete = id && ['song','member', ...KINDS].includes(k);
