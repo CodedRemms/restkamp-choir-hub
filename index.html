@@ -120,6 +120,22 @@ main{padding-block:18px 64px}
 .spread{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .spread > div{min-width:0}
 .pin{border-left:5px solid var(--gold)}
+.lineup{display:grid;gap:8px;margin:0;padding:0;list-style:none;counter-reset:s}
+.lineup li{counter-increment:s;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.lineup li::before{content:counter(s);font-family:var(--display);font-weight:800;color:var(--mut);text-align:center;font-variant-numeric:tabular-nums}
+.lineup li > div{min-width:0}
+.lineup b{display:block;font-weight:700;overflow-wrap:anywhere}
+.play{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;background:var(--gold);color:var(--gold-ink)!important;font-weight:800;font-size:14px;text-decoration:none;white-space:nowrap}
+.play.find{background:transparent;border:1.5px solid var(--line);color:var(--ink)!important}
+.parth{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:22px 0 10px}
+.parth h3{font-size:20px}
+.sunhead{display:grid;gap:6px;padding:18px;border-radius:20px;color:#fff;background:linear-gradient(140deg,#a52c58,var(--wine) 60%,#2e0815)}
+.sunhead .kv span{background:rgba(255,255,255,.16)}
+.hero-lu{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:2px;padding:0 16px;border-radius:999px;border:0;background:var(--gold);color:var(--gold-ink);font-weight:800;cursor:pointer;width:max-content}
+.lsong{display:grid;gap:6px;padding:12px;border-radius:14px;border:1px dashed var(--line);margin-bottom:8px}
+.lsong .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--mut);font-weight:700}
+.minis{display:flex;gap:4px}
+.mini.sq{width:38px;padding:0}
 .month{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:20px 0 10px}
 .btn{font:inherit;font-weight:700;border:0;border-radius:12px;min-height:44px;padding:10px 16px;background:var(--wine);color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn[disabled]{opacity:.6;cursor:default}
@@ -196,7 +212,7 @@ const P = {
 };
 const ic = (k, sw = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[k]}</svg>`;
 const TABS = [['home','Home'],['news','News'],['songs','Songs'],['rota','Schedule'],['rules','Rules'],['att','Attendance']];
-const TITLES = {home:'Home', news:'Announcements', songs:'Song bank', rota:'Schedule', rules:'Rules & check', att:'Attendance'};
+const TITLES = {sun:'Sunday lineup', home:'Home', news:'Announcements', songs:'Song bank', rota:'Schedule', rules:'Rules & check', att:'Attendance'};
 
 async function api(path, opts = {}) {
   const r = await fetch(SB + '/rest/v1/' + path, {...opts, headers: {apikey: KEY, 'Content-Type': 'application/json', ...(opts.headers || {})}});
@@ -223,11 +239,12 @@ const SCH = {
   member: {label:'member', req:['name'], fields:[['name','Name *']]}
 };
 
+var sunDate = '', lineEdit = null;
 let tab = tabFromHash(), code = store.get('choirCode'), editor = true, loading = true, loadErr = '';
 let items = {announcement:[], event:[], rota:[], rule:[], check:[]}, songs = [], roster = null;
 let form = null, toastMsg = '', cat = 'All', q = '', picked = [], checked = {}, attDate = todayISO(), attStatus = '', fresh = true;
 const timers = {};
-function tabFromHash(){ const h = location.hash.slice(1); return TABS.some(t => t[0] === h) ? h : 'home'; }
+function tabFromHash(){ const h = location.hash.slice(1); if (/^sun-\d{4}-\d{2}-\d{2}$/.test(h)) { sunDate = h.slice(4); return 'sun'; } return TABS.some(t => t[0] === h) ? h : 'home'; }
 
 function toast(m){ toastMsg = m; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { toastMsg = ''; render(); }, 2800); }
 const ytUrl = s => s.youtube_url || ('https://www.youtube.com/results?search_query=' + encodeURIComponent(s.title + ' worship'));
@@ -244,7 +261,7 @@ async function load(){
   } catch (e) { loadErr = 'Could not load. Check your connection, then tap Refresh.'; }
   loading = false;
   const a = document.activeElement;
-  if (!form && !(a && ['INPUT','TEXTAREA','SELECT'].includes(a.tagName))) render();
+  if (!form && !lineEdit && !(a && ['INPUT','TEXTAREA','SELECT'].includes(a.tagName))) render();
 }
 async function loadRoster(){
   try { const r = await ed('editor_get_roster'); roster = {members: r.members, attendance: r.attendance}; }
@@ -286,7 +303,7 @@ function homeV(){
       <h2>${esc(CHOIR_NAME)}</h2>
       <p class="tag-line">${esc(TAGLINE)}</p>
       <div class="next">${nr ? `<div class="lbl">Next ministration · ${fmt(nr.date)}</div><h3>${esc(nr.service) || 'Service'}</h3>
-        <div class="kv"><span>Lead: <b>${esc(nr.lead) || 'TBA'}</b></span><span>Uniform: <b>${esc(nr.uniform) || 'TBA'}</b></span></div>`
+        <div class="kv"><span>Lead: <b>${esc(nr.lead) || 'TBA'}</b></span><span>Uniform: <b>${esc(nr.uniform) || 'TBA'}</b></span></div>${luBtn(nr, 'hero-lu')}`
         : `<div class="lbl">Next ministration</div><h3>Not scheduled yet</h3><div class="kv"><span>Add dates in Schedule</span></div>`}</div>
       ${minister ? `<div class="kv" style="margin-top:12px;position:relative"><span>${esc(mon)} ministration: <b>${esc(minister)}</b></span></div>` : ''}
     </section>
@@ -294,6 +311,80 @@ function homeV(){
     <div class="tiles">${tiles.map(([k, t, s], i) => `<button class="tile" data-act="tab" data-v="${k}" style="animation-delay:${.08 * i + (fresh ? .35 : 0)}s"><div class="ti">${ic(k)}</div><b>${t}</b><span>${esc(s)}</span></button>`).join('')}</div>
     ${top ? `<div class="sec"><h2>Latest</h2><button class="mini" data-act="tab" data-v="news">See all</button></div>
       <div class="card ${top.pin ? 'pin' : ''}"><h3>${esc(top.title)}</h3><div class="mut">${fmt(top.date)}${top.pin ? (top.date ? ' · ' : '') + 'Pinned' : ''}</div>${top.body ? `<p style="margin:8px 0 0;white-space:pre-wrap">${esc(top.body)}</p>` : ''}</div>` : ''}`;
+}
+
+const luCount = r => (r.lineup || []).reduce((n, p) => n + (p.songs || []).length, 0);
+const luBtn = (r, cls = 'btn alt') => { const n = luCount(r); return `<button class="${cls}" data-act="tab" data-v="sun-${r.date}">${n ? `♪ View lineup · ${n} song${n === 1 ? '' : 's'}` : '+ Add lineup'}</button>`; };
+const ytSearch = t => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(t);
+function luText(r){
+  return `*Sunday lineup – ${fmt(r.date)}*` + (r.lead ? `\nLead: ${r.lead}` : '') + '\n' + (r.lineup || []).map(p => `\n*${p.name}*\n` + p.songs.map((g, i) => `${i + 1}. ${g.t}${g.yt ? '\n' + g.yt : ''}`).join('\n')).join('\n');
+}
+function sunV(){
+  const r = items.rota.find(x => x.date === sunDate);
+  if (!r) return `<div class="empty">No Sunday on ${esc(fmt(sunDate))} in the schedule yet. Add the date in Schedule first.</div>`;
+  const head = `<div class="sunhead"><div class="hello" style="color:var(--gold)">${fmt(r.date)}</div><h2 style="font-size:28px">${esc(r.service) || 'Sunday service'}</h2>
+    <div class="kv"><span>Lead: <b>${esc(r.lead) || 'TBA'}</b></span><span>Uniform: <b>${esc(r.uniform) || 'TBA'}</b></span></div></div>`;
+  if (lineEdit && lineEdit.id === r.id) return head + lineEditorV();
+  const L = r.lineup || [];
+  const tools = `<div class="row" style="margin-top:16px"><button class="btn" data-act="le_start">${L.length ? '✎ Edit lineup' : '+ Add lineup'}</button>
+    ${L.length ? `<a class="btn alt" href="https://wa.me/?text=${encodeURIComponent(luText(r))}" target="_blank" rel="noopener">Send on WhatsApp</a>` : ''}</div>`;
+  const body = L.length ? L.map(p => `<div class="parth"><h3>${esc(p.name)}</h3>${p.lead ? `<span class="mut">Lead: <b>${esc(p.lead)}</b></span>` : ''}</div>
+    ${p.songs.length ? `<ol class="lineup">${p.songs.map(g => `<li><div><b>${esc(g.t)}</b></div>${g.yt ? `<a class="play" href="${esc(g.yt)}" target="_blank" rel="noopener">▶ Play</a>` : `<a class="play find" href="${esc(ytSearch(g.t))}" target="_blank" rel="noopener">Find</a>`}</li>`).join('')}</ol>` : '<div class="empty">Songs to be confirmed.</div>'}`).join('')
+    : '<div class="empty" style="margin-top:16px">No lineup posted for this Sunday yet. Tap “Add lineup” to post the songs.</div>';
+  return head + tools + body;
+}
+function lineEditorV(){
+  const e = lineEdit;
+  const opts = `<option value="">+ Pick from song bank…</option>` + songs.map(s => `<option value="${s.id}">${esc(s.title)}</option>`).join('');
+  return `${e.err ? `<div class="err" role="alert" style="margin-top:14px">${esc(e.err)}</div>` : ''}` + e.sections.map((p, i) => `<div class="card" data-lsec="${i}" style="margin-top:16px">
+      <div class="row2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px">
+        <div><label for="ln${i}" style="margin-top:0">Section</label><input id="ln${i}" data-lf="name" value="${esc(p.name)}" placeholder="e.g. Worship, Praise"></div>
+        <div><label for="ll${i}" style="margin-top:0">Lead (optional)</label><input id="ll${i}" data-lf="lead" value="${esc(p.lead || '')}"></div>
+      </div>
+      <div style="margin-top:12px">${p.songs.map((g, j) => `<div class="lsong" data-lsong="${j}"><div class="hd"><span>Song ${j + 1}</span><span class="minis">
+        <button class="mini sq" data-act="le_up" aria-label="Move up">↑</button><button class="mini sq" data-act="le_down" aria-label="Move down">↓</button><button class="mini sq" data-act="le_rmsong" aria-label="Remove song">✕</button></span></div>
+        <input id="lt${i}_${j}" data-lg="t" value="${esc(g.t)}" placeholder="Song title" aria-label="Song title">
+        <input id="ly${i}_${j}" data-lg="yt" value="${esc(g.yt)}" placeholder="YouTube link (optional) https://…" inputmode="url" aria-label="YouTube link"></div>`).join('')}</div>
+      <div class="row"><button class="mini" data-act="le_addsong">+ Add song</button><select data-lpick aria-label="Pick from song bank" style="flex:1;min-width:180px;width:auto">${opts}</select><button class="mini" data-act="le_rmsec" style="color:var(--bad)">Remove section</button></div>
+    </div>`).join('') + `<div class="row" style="margin-top:12px"><button class="mini" data-act="le_addsec">+ Add section</button></div>
+    <div class="row" style="margin-top:16px"><button class="btn" data-act="le_save" ${e.busy ? 'disabled' : ''}>${e.busy ? 'Saving…' : 'Save lineup'}</button><button class="btn alt" data-act="le_cancel">Cancel</button></div>`;
+}
+function readLE(){
+  if (!lineEdit) return;
+  document.querySelectorAll('[data-lsec]').forEach(c => {
+    const p = lineEdit.sections[+c.dataset.lsec]; if (!p) return;
+    c.querySelectorAll('[data-lf]').forEach(i => p[i.dataset.lf] = i.value);
+    c.querySelectorAll('[data-lsong]').forEach(row => { const g = p.songs[+row.dataset.lsong]; row.querySelectorAll('[data-lg]').forEach(i => g[i.dataset.lg] = i.value); });
+  });
+}
+async function lineAct(act, el){
+  const r = items.rota.find(x => x.date === sunDate); if (!r) return;
+  if (act === 'le_start') { lineEdit = {id: r.id, err: '', busy: false, sections: (r.lineup && r.lineup.length) ? JSON.parse(JSON.stringify(r.lineup)) : [{name:'Worship', lead:'', songs:[{t:'', yt:''}]}, {name:'Praise', lead:'', songs:[{t:'', yt:''}]}]}; render(); return; }
+  if (!lineEdit) return;
+  readLE();
+  const c = el.closest('[data-lsec]'), p = c ? lineEdit.sections[+c.dataset.lsec] : null;
+  const row = el.closest('[data-lsong]'), j = row ? +row.dataset.lsong : -1;
+  if (act === 'le_cancel') lineEdit = null;
+  if (act === 'le_addsong') p.songs.push({t:'', yt:''});
+  if (act === 'le_rmsong') p.songs.splice(j, 1);
+  if (act === 'le_up' && j > 0) [p.songs[j-1], p.songs[j]] = [p.songs[j], p.songs[j-1]];
+  if (act === 'le_down' && j < p.songs.length - 1) [p.songs[j+1], p.songs[j]] = [p.songs[j], p.songs[j+1]];
+  if (act === 'le_addsec') lineEdit.sections.push({name:'', lead:'', songs:[{t:'', yt:''}]});
+  if (act === 'le_rmsec') lineEdit.sections.splice(+c.dataset.lsec, 1);
+  if (act === 'le_save') {
+    const secs = lineEdit.sections.map(p => ({name: p.name.trim(), lead: (p.lead || '').trim(), songs: p.songs.map(g => ({t: g.t.trim(), yt: g.yt.trim()})).filter(g => g.t || g.yt)})).filter(p => p.name || p.songs.length);
+    if (secs.some(p => !p.name)) { lineEdit.err = 'Give every section a name, e.g. Worship or Praise.'; render(); return; }
+    if (secs.some(p => p.songs.some(g => !g.t))) { lineEdit.err = 'Every song needs a title.'; render(); return; }
+    if (secs.some(p => p.songs.some(g => g.yt && !/^https?:\/\//i.test(g.yt)))) { lineEdit.err = 'YouTube links must start with https://'; render(); return; }
+    lineEdit.busy = true; lineEdit.err = ''; render();
+    try {
+      const data = {...r, lineup: secs}; delete data.id;
+      await ed('editor_save_item', {p_id: r.id, p_kind: 'rota', p_data: data});
+      lineEdit = null; await load(); toast('Lineup saved. Everyone can see it now.');
+    } catch (err) { lineEdit.busy = false; lineEdit.err = "Couldn't save: " + err.message; render(); }
+    return;
+  }
+  render();
 }
 
 function newsV(){
@@ -335,12 +426,12 @@ function rotaV(){
   const up = items.rota.filter(r => r.date >= todayISO()).sort((a,b) => a.date.localeCompare(b.date));
   const past = items.rota.filter(r => r.date < todayISO()).sort((a,b) => b.date.localeCompare(a.date));
   const card = r => `<div class="card"><div class="spread"><div><h3>${fmt(r.date)}</h3><div class="mut">${esc(r.service)}</div></div>${editBtn('rota', r.id)}</div>
-    <div style="margin-top:8px"><b>Lead:</b> ${esc(r.lead) || '-'}<br><b>Uniform:</b> ${esc(r.uniform) || '-'}</div>${r.notes ? `<div class="mut" style="margin-top:6px;white-space:pre-wrap">${esc(r.notes)}</div>` : ''}</div>`;
+    <div style="margin-top:8px"><b>Lead:</b> ${esc(r.lead) || '-'}<br><b>Uniform:</b> ${esc(r.uniform) || '-'}</div>${r.notes ? `<div class="mut" style="margin-top:6px;white-space:pre-wrap">${esc(r.notes)}</div>` : ''}<div style="margin-top:12px">${luBtn(r)}</div></div>`;
   let lastM = '';
   const grouped = up.map(r => { const m = new Date(r.date + 'T00:00:00').toLocaleString('en', {month:'long', year:'numeric'}); const h = m !== lastM ? `<h3 class="month">${m}</h3>` : ''; lastM = m; return h + card(r); }).join('');
   return `<div class="sec" style="margin-top:4px"><h2>Upcoming Sundays</h2><div class="row">${addBtn('rotabulk','Quarter')}${addBtn('rota','Date')}</div></div>
   ${grouped || '<div class="empty">No upcoming dates yet.</div>'}
-  ${past.length ? `<details><summary class="mut" style="cursor:pointer;margin:14px 0;font-weight:700">Past dates (${past.length})</summary>${past.map(card).join('')}</details>` : ''}`;
+  ${past.length ? `<details><summary class="mut" style="cursor:pointer;margin:14px 0;font-weight:700">Past Sundays and their lineups (${past.length})</summary>${past.map(card).join('')}</details>` : ''}`;
 }
 
 function rulesV(){
@@ -396,14 +487,16 @@ function formV(){
 
 let lastTab = null;
 function render(){
-  const y = window.scrollY, changed = lastTab !== tab; lastTab = tab;
-  const views = {home:homeV, news:newsV, songs:songsV, rota:rotaV, rules:rulesV, att:attV};
+  readLE();
+  const key = tab + sunDate, y = window.scrollY, changed = lastTab !== key; lastTab = key;
+  const views = {sun:sunV, home:homeV, news:newsV, songs:songsV, rota:rotaV, rules:rulesV, att:attV};
   const body = loading ? '<div class="empty">Loading...</div>' : (loadErr ? `<div class="empty">${esc(loadErr)}</div>` : views[tab]());
   const barL = tab === 'home'
     ? `<a class="brand" href="#" data-act="tab" data-v="home"><span class="logo">${ic('note', 2.4).replace('currentColor', '#e3b04b')}</span>${esc(CHOIR_NAME)}</a>`
+    : tab === 'sun' ? `<button class="back" data-act="tab" data-v="rota" aria-label="Back to schedule">${ic('back', 2.6)}Schedule</button><h1>${TITLES[tab]}</h1>`
     : `<button class="back" data-act="tab" data-v="home" aria-label="Back to home">${ic('back', 2.6)}Home</button><h1>${TITLES[tab]}</h1>`;
   $('#app').innerHTML = `<div class="top"><div class="wrap"><div class="bar">${barL}<button class="iconbtn" data-act="refresh" aria-label="Refresh">${ic('refresh')}</button></div>
-    <nav class="tabs" aria-label="Sections">${TABS.map(([k, l]) => `<button class="tab ${tab === k ? 'on' : ''}" data-act="tab" data-v="${k}" ${tab === k ? 'aria-current="page"' : ''}>${ic(k)}${l}</button>`).join('')}</nav></div></div>
+    <nav class="tabs" aria-label="Sections">${TABS.map(([k, l]) => `<button class="tab ${tab === k || (tab === 'sun' && k === 'rota') ? 'on' : ''}" data-act="tab" data-v="${k}" ${tab === k ? 'aria-current="page"' : ''}>${ic(k)}${l}</button>`).join('')}</nav></div></div>
     <main class="wrap"><div class="${changed ? 'view' : ''}">${body}</div></main>
     ${form ? formV() : ''}${toastMsg ? `<div class="toast" role="status">${esc(toastMsg)}</div>` : ''}`;
   if (changed) { window.scrollTo(0, 0); const on = document.querySelector('.tab.on'); if (on) on.scrollIntoView({inline:'center', block:'nearest'}); }
@@ -439,6 +532,7 @@ async function doSave(v){
     for (const r of rows) await ed('editor_save_item', {p_id: null, p_kind: 'rota', p_data: r});
     await load(); return rows.length + ' dates added';
   }
+  if (c === 'rota' && id) { const old = items.rota.find(x => x.id === id); if (old && old.lineup) v.lineup = old.lineup; }
   await ed('editor_save_item', {p_id: id || null, p_kind: c, p_data: v});
   await load(); return 'Saved';
 }
@@ -475,11 +569,12 @@ function queueSave(day){
   }, 500);
 }
 
-function goTab(v){ fresh = false; if (v === tab) { window.scrollTo({top:0, behavior:'smooth'}); return; } location.hash = v === 'home' ? '' : v; if (v === 'home') onHash(); }
-function onHash(){ tab = tabFromHash(); if (tab === 'att' && !roster) loadRoster(); form = null; render(); }
+function goTab(v){ fresh = false; if (v === tab && v !== 'sun') { window.scrollTo({top:0, behavior:'smooth'}); return; } location.hash = v === 'home' ? '' : v; if (v === 'home') onHash(); }
+function onHash(){ lineEdit = null; tab = tabFromHash(); if (tab === 'att' && !roster) loadRoster(); form = null; render(); }
 window.addEventListener('hashchange', onHash);
 
 const A = {
+  le_start: (d, el) => { lineAct('le_start', el); return 'skip'; },
   tab: d => { goTab(d.v); return 'skip'; },
   refresh: () => { loading = true; render(); load(); if (roster) loadRoster(); return 'skip'; },
   add: d => { form = {c: d.c, id: null}; },
@@ -513,6 +608,7 @@ app.addEventListener('click', e => {
   if (t.classList.contains('modal') && e.target !== t) return;
   if (t.tagName === 'A' && t.dataset.act !== 'tab') return;
   if (t.tagName === 'A') e.preventDefault();
+  if (t.dataset.act.startsWith('le_')) { lineAct(t.dataset.act, t); return; }
   if (A[t.dataset.act]?.(t.dataset) !== 'skip') render();
 });
 app.addEventListener('keydown', e => {
@@ -520,7 +616,8 @@ app.addEventListener('keydown', e => {
   if (e.key === 'Enter' && form && e.target.tagName === 'INPUT') { e.preventDefault(); saveForm(); }
 });
 app.addEventListener('input', e => { if (e.target.id === 'q') { q = e.target.value; $('#slist').innerHTML = songListV(); } });
-app.addEventListener('change', e => { if (e.target.id === 'ad' && e.target.value) { attDate = e.target.value; render(); } });
+app.addEventListener('change', e => {
+  if (e.target.matches('[data-lpick]') && lineEdit && e.target.value) { readLE(); const s = songs.find(x => x.id === e.target.value); const p = lineEdit.sections[+e.target.closest('[data-lsec]').dataset.lsec]; if (s && p) { const blank = p.songs.findIndex(g => !g.t && !g.yt); const g = {t: s.title, yt: s.youtube_url || ''}; if (blank >= 0) p.songs[blank] = g; else p.songs.push(g); } render(); return; } if (e.target.id === 'ad' && e.target.value) { attDate = e.target.value; render(); } });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
 setInterval(() => { if (!document.hidden) load(); }, 90000);
 
