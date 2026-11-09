@@ -8,6 +8,12 @@
 <meta property="og:title" content="RESTKAMP Choir">
 <meta property="og:description" content="Songs, schedules, rules and announcements for the RESTKAMP Choir.">
 <meta name="theme-color" content="#5a1229">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RESTKAMP">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%235a1229'/%3E%3Cpath d='M26 44a6 6 0 1 1-4-5.7V16l22-5v24a6 6 0 1 1-4-5.7V17.5l-14 3.2Z' fill='%23e3b04b'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
@@ -136,6 +142,20 @@ main{padding-block:18px 64px}
 .lsong .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--mut);font-weight:700}
 .minis{display:flex;gap:4px}
 .mini.sq{width:38px;padding:0}
+.notif{display:flex;gap:14px;align-items:center;margin-top:16px;padding:16px;border-radius:20px;background:var(--card);border:1.5px solid var(--gold);box-shadow:var(--shadow)}
+.notif .ni{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--gold);color:var(--gold-ink)}
+.notif .ni svg{width:24px;height:24px}
+.notif b{display:block;font-family:var(--display);font-size:17px}
+.notif span{display:block;font-size:14px;color:var(--mut)}
+.notif > div{flex:1;min-width:0}
+.adminbtn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;font-size:14px;cursor:pointer;flex:none;margin-left:auto}
+.adminbtn svg{width:18px;height:18px}
+.adminbtn.on{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.adminbtn + .iconbtn{margin-left:0}
+.steps{margin:8px 0 0;padding-left:22px;display:grid;gap:8px}
+.stat{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat .card{margin:0}
+.stat b{display:block;font-family:var(--display);font-size:32px;line-height:1.1}
 .month{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:20px 0 10px}
 .btn{font:inherit;font-weight:700;border:0;border-radius:12px;min-height:44px;padding:10px 16px;background:var(--wine);color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn[disabled]{opacity:.6;cursor:default}
@@ -208,11 +228,15 @@ const P = {
   refresh:'<path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/>',
   star:'<path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7Z"/>',
   go:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4Z"/><path d="M10 21a2 2 0 0 0 4 0"/>',
+  admin:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/><circle cx="12" cy="11" r="2.5"/><path d="M8.5 16.5a4 4 0 0 1 7 0"/>',
   note:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>'
 };
 const ic = (k, sw = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[k]}</svg>`;
 const TABS = [['home','Home'],['news','News'],['songs','Songs'],['rota','Schedule'],['rules','Rules'],['att','Attendance']];
-const TITLES = {sun:'Sunday lineup', home:'Home', news:'Announcements', songs:'Song bank', rota:'Schedule', rules:'Rules & check', att:'Attendance'};
+const VAPID = 'BA7WAvAGf0pc9mBPW08jITLp1eZ9rkRa09Ou-4Q3fItlZRjGkWpDhkAAljDcbFzygCcwGW4qQVHIcSXxUFFt-Lw';
+const TITLES = {admin:'Admin', sun:'Sunday lineup', home:'Home', news:'Announcements', songs:'Song bank', rota:'Schedule', rules:'Rules & check', att:'Attendance'};
 
 async function api(path, opts = {}) {
   const r = await fetch(SB + '/rest/v1/' + path, {...opts, headers: {apikey: KEY, 'Content-Type': 'application/json', ...(opts.headers || {})}});
@@ -222,13 +246,13 @@ async function api(path, opts = {}) {
 const rpc = (fn, args) => api('rpc/' + fn, {method: 'POST', body: JSON.stringify(args)});
 async function ed(fn, args = {}) {
   const r = await rpc(fn, {p_code: code, ...args});
-  if (r && r.ok === false) throw new Error(r.error || 'Not allowed');
+  if (r && r.ok === false) { if (/pin|code/i.test(r.error || '')) { editor = false; code = ''; store.set('choirCode', ''); } throw new Error(r.error || 'Only admins can do that. Sign in with the admin PIN.'); }
   return r;
 }
 
 const KINDS = ['announcement', 'event', 'rota', 'rule', 'check'];
 const SCH = {
-  announcement: {label:'announcement', req:['title'], fields:[['title','Title *'],['body','Details','textarea'],['date','Date','date'],['pin','Pin to top','check']]},
+  announcement: {label:'announcement', req:['title'], fields:[['title','Title *'],['body','Details','textarea'],['date','Date','date'],['pin','Pin to top','check'],['notify','Also send to everyone\'s phone','check']]},
   event: {label:'activity', req:['title','date'], fields:[['title','What is happening *'],['date','Date *','date'],['time','Time (e.g. 7:00 PM)'],['place','Place'],['notes','Notes','textarea']]},
   rota: {label:'schedule entry', req:['date'], fields:[['date','Date *','date'],['service','Service or event'],['lead','Lead(s)'],['uniform','Uniform'],['notes','Notes','textarea']]},
   rotabulk: {label:'quarterly schedule', req:['lines'], fields:[['lines','Dates, one per line *','textarea',null,'Format: 2026-11-01 | Sunday service | Lead name | Uniform']]},
@@ -236,20 +260,23 @@ const SCH = {
   check: {label:'check item', req:['text'], fields:[['text','Check item *']]},
   song: {label:'song', req:['title'], fields:[['title','Song title *'],['type','Type','select',['Worship','Praise','Hymn','Special','Opening','Closing']],['musical_key','Key (e.g. G)'],['youtube_url','YouTube link','text',null,'Paste the full link, starting with https://'],['notes','Notes (who it suits, tempo, etc.)','textarea'],['added_by','Your name (optional)']]},
   members: {label:'members', req:['names'], fields:[['names','Names, one per line *','textarea']]},
-  member: {label:'member', req:['name'], fields:[['name','Name *']]}
+  member: {label:'member', req:['name'], fields:[['name','Name *']]},
+  signin: {label:'Admin sign-in', req:['code'], fields:[['code','Admin PIN *','pin',null,'Ask the choir coordinator for the PIN.']]},
+  code: {label:'Change admin PIN', req:['new_code'], fields:[['new_code','New admin PIN (at least 4 characters) *','pin',null,'Share the new PIN with the other admins.']]},
+  notify: {label:'Send a notification', req:['title'], fields:[['title','Title *',null,null,'Short, e.g. Rehearsal moved to 7pm'],['body','Message','textarea']]}
 };
 
 var sunDate = '', lineEdit = null;
-let tab = (location.hash && history.replaceState(null, '', location.pathname + location.search), 'home'), code = store.get('choirCode'), editor = true, loading = true, loadErr = '';
+let tab = (location.hash && history.replaceState(null, '', location.pathname + location.search), 'home'), code = store.get('choirCode'), editor = false, loading = true, loadErr = '';
 let items = {announcement:[], event:[], rota:[], rule:[], check:[]}, songs = [], roster = null;
 let form = null, toastMsg = '', cat = 'All', q = '', picked = [], checked = {}, attDate = todayISO(), attStatus = '', fresh = true;
 const timers = {};
-function tabFromHash(){ const h = location.hash.slice(1); if (/^sun-\d{4}-\d{2}-\d{2}$/.test(h)) { sunDate = h.slice(4); return 'sun'; } return TABS.some(t => t[0] === h) ? h : 'home'; }
+function tabFromHash(){ const h = location.hash.slice(1); if (/^sun-\d{4}-\d{2}-\d{2}$/.test(h)) { sunDate = h.slice(4); return 'sun'; } return (TABS.some(t => t[0] === h) || h === 'admin') ? h : 'home'; }
 
 function toast(m){ toastMsg = m; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { toastMsg = ''; render(); }, 2800); }
 const ytUrl = s => s.youtube_url || ('https://www.youtube.com/results?search_query=' + encodeURIComponent(s.title + ' worship'));
-const addBtn = (k, t) => `<button class="mini" data-act="add" data-c="${k}">+ ${t}</button>`;
-const editBtn = (k, id) => `<button class="mini" data-act="edit" data-c="${k}" data-id="${id}">Edit</button>`;
+const addBtn = (k, t) => !editor ? '' : `<button class="mini" data-act="add" data-c="${k}">+ ${t}</button>`;
+const editBtn = (k, id) => !editor ? '' : `<button class="mini" data-act="edit" data-c="${k}" data-id="${id}">Edit</button>`;
 
 async function load(){
   try {
@@ -289,7 +316,7 @@ function homeV(){
     ['songs', 'Song bank', `${songs.length} song${songs.length === 1 ? '' : 's'} · add yours`],
     ['rota', 'Schedule', nr ? `Next: ${fmt(nr.date)}` : 'No dates yet'],
     ['rules', 'Rules & check', `${items.rule.length} rule${items.rule.length === 1 ? '' : 's'} · ${items.check.length}-point check`],
-    ['att', 'Attendance', 'Mark rehearsals'],
+    ...(editor ? [['att', 'Attendance', 'Mark rehearsals'], ['admin', 'Admin', 'Notifications & PIN']] : []),
   ];
   const top = ann[0];
   const mon = new Date().toLocaleString('en', {month:'long'});
@@ -308,6 +335,7 @@ function homeV(){
       ${minister ? `<div class="kv" style="margin-top:12px;position:relative"><span>${esc(mon)} ministration: <b>${esc(minister)}</b></span></div>` : ''}
     </section>
     ${aopBanner()}
+    ${notifCard()}
     <div class="tiles">${tiles.map(([k, t, s], i) => `<button class="tile" data-act="tab" data-v="${k}" style="animation-delay:${.08 * i + (fresh ? .35 : 0)}s"><div class="ti">${ic(k)}</div><b>${t}</b><span>${esc(s)}</span></button>`).join('')}</div>
     ${top ? `<div class="sec"><h2>Latest</h2><button class="mini" data-act="tab" data-v="news">See all</button></div>
       <div class="card ${top.pin ? 'pin' : ''}"><h3>${esc(top.title)}</h3><div class="mut">${fmt(top.date)}${top.pin ? (top.date ? ' · ' : '') + 'Pinned' : ''}</div>${top.body ? `<p style="margin:8px 0 0;white-space:pre-wrap">${esc(top.body)}</p>` : ''}</div>` : ''}`;
@@ -378,13 +406,76 @@ async function lineAct(act, el){
     if (secs.some(p => p.songs.some(g => g.yt && !/^https?:\/\//i.test(g.yt)))) { lineEdit.err = 'YouTube links must start with https://'; render(); return; }
     lineEdit.busy = true; lineEdit.err = ''; render();
     try {
-      const data = {...r, lineup: secs}; delete data.id;
-      await ed('editor_save_item', {p_id: r.id, p_kind: 'rota', p_data: data});
+      const res = await rpc('save_lineup', {p_id: r.id, p_lineup: secs});
+      if (res && res.ok === false) throw new Error(res.error || 'Not saved');
       lineEdit = null; await load(); toast('Lineup saved. Everyone can see it now.');
     } catch (err) { lineEdit.busy = false; lineEdit.err = "Couldn't save: " + err.message; render(); }
     return;
   }
   render();
+}
+
+/* ---------- Phone notifications ---------- */
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+let guide = false, stats = null;
+function notifCard(){
+  if (pushSupported()) {
+    if (Notification.permission === 'granted' && store.get('pushOn')) return '';
+    if (Notification.permission === 'denied') return `<div class="notif"><div class="ni">${ic('bell')}</div><div><b>Notifications are blocked</b><span>Turn them on in your phone's Settings → Notifications → RESTKAMP.</span></div></div>`;
+    return `<div class="notif"><div class="ni">${ic('bell')}</div><div><b>Get choir updates on your phone</b><span>Announcements and reminders, straight to your lock screen.</span></div><button class="btn" data-act="pushon">Turn on</button></div>`;
+  }
+  if (isIOS && !standalone()) return `<div class="notif"><div class="ni">${ic('bell')}</div><div><b>Want choir notifications?</b><span>On iPhone, add this app to your Home Screen first.</span></div><button class="btn" data-act="guide">Show me</button></div>`;
+  return '';
+}
+function guideV(){
+  return `<div class="modal" data-act="closeguide"><div class="sheet"><h2>Add RESTKAMP to your Home Screen</h2>
+    <h3 style="margin-top:16px">iPhone</h3><ol class="steps">
+      <li>Open this link in <b>Safari</b>. If you tapped it in WhatsApp, tap the menu and choose “Open in Safari”.</li>
+      <li>Tap the <b>Share</b> button (square with an arrow), then <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+      <li>Open RESTKAMP from the new icon on your Home Screen.</li>
+      <li>Tap <b>Turn on</b> on the notifications card and choose <b>Allow</b>.</li></ol>
+    <h3 style="margin-top:16px">Android</h3><ol class="steps">
+      <li>Open the link in <b>Chrome</b>, tap <b>⋮</b>, then <b>Add to Home screen</b> or <b>Install app</b>.</li>
+      <li>Open RESTKAMP and tap <b>Turn on</b>, then <b>Allow</b>.</li></ol>
+    <div class="row" style="margin-top:20px"><button class="btn" data-act="closeguide">Got it</button></div></div></div>`;
+}
+function b64ToBytes(b){ const p = '='.repeat((4 - b.length % 4) % 4); const s = atob((b + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(s, c => c.charCodeAt(0)); }
+async function saveSub(sub){ const j = sub.toJSON(); const r = await rpc('push_subscribe', {p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 290)}); if (r && r.ok === false) throw new Error(r.error); }
+async function pushOn(){
+  if (!pushSupported()) { guide = true; render(); return; }
+  let perm;
+  try { perm = await Notification.requestPermission(); } catch (e) { perm = Notification.permission; }
+  if (perm !== 'granted') { toast(perm === 'denied' ? 'Notifications are blocked. You can allow them in your phone settings.' : 'Notifications not turned on.'); return; }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64ToBytes(VAPID)});
+    await saveSub(sub); store.set('pushOn', '1'); toast('Notifications are on. You will get choir updates on this phone.');
+  } catch (e) { toast('Could not turn on notifications: ' + e.message); }
+}
+async function sendPush(title, body){
+  const r = await fetch(SB + '/functions/v1/send-push', {method: 'POST', headers: {apikey: KEY, 'Content-Type': 'application/json'}, body: JSON.stringify({code, title, body, url: '/'})});
+  let d = {}; try { d = await r.json(); } catch (e) {}
+  if (!r.ok || !d.ok) { if (r.status === 401) { editor = false; code = ''; store.set('choirCode', ''); } throw new Error(d.error || 'Could not send (' + r.status + ')'); }
+  return `Sent to ${d.sent} phone${d.sent === 1 ? '' : 's'}.`;
+}
+async function loadStats(){ try { const r = await ed('push_stats'); stats = r; } catch (e) { stats = {error: e.message}; } if (tab === 'admin' && !form) render(); }
+function adminV(){
+  if (!editor) return `<div class="empty">Sign in with the admin PIN to use this page.<div style="margin-top:12px"><button class="btn" data-act="signin">Sign in</button></div></div>`;
+  if (!stats) { stats = {loading: true}; loadStats(); }
+  if (stats.loading) return '<div class="empty">Loading...</div>';
+  const recent = (stats.recent || []).map(n => `<div class="card"><h3>${esc(n.title)}</h3><div class="mut">${new Date(n.at).toLocaleString(undefined, {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})} · sent to ${n.sent}${n.failed ? `, ${n.failed} failed` : ''}</div>${n.body ? `<p style="margin:6px 0 0;white-space:pre-wrap">${esc(n.body)}</p>` : ''}</div>`).join('');
+  return `${stats.error ? `<div class="err">${esc(stats.error)}</div>` : ''}
+    <div class="stat" style="margin-top:4px"><div class="card"><span class="mut">Phones with notifications on</span><b>${stats.phones ?? '–'}</b></div>
+      <div class="card"><span class="mut">You are</span><b style="font-size:22px">Admin</b></div></div>
+    <div class="sec"><h2>Notify the choir</h2></div>
+    <div class="card"><p style="margin:0 0 12px">Send a message to every phone that has turned on notifications. You can also tick “Also send to everyone's phone” when you add an announcement.</p>
+      <button class="btn" data-act="add" data-c="notify">${ic('bell').replace('<svg', '<svg width="18" height="18"')} Send a notification</button></div>
+    ${recent ? `<div class="sec"><h2>Recently sent</h2></div>${recent}` : ''}
+    <div class="sec"><h2>Admin tools</h2></div>
+    <div class="card"><p style="margin:0 0 12px">As admin you can add, edit and delete announcements, activities, Sunday schedule (leads and uniforms), rules, songs and attendance. Everyone else can view, add songs and post Sunday lineups.</p>
+      <div class="row"><button class="btn alt" data-act="changecode">Change admin PIN</button><button class="btn alt" data-act="guide">How to install the app</button><button class="btn bad" data-act="signout">Sign out</button></div></div>`;
 }
 
 function newsV(){
@@ -476,12 +567,13 @@ function formV(){
     if (t === 'textarea') return `<label for="f_${n}">${lbl}</label><textarea id="f_${n}" name="${n}">${esc(v)}</textarea>${h}`;
     if (t === 'check') return `<label class="ck"><input type="checkbox" name="${n}" ${v ? 'checked' : ''}> ${lbl}</label>`;
     if (t === 'select') return `<label for="f_${n}">${lbl}</label><select id="f_${n}" name="${n}">${opts.map(o => `<option ${o === v ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
+    if (t === 'pin') return `<label for="f_${n}">${lbl}</label><input id="f_${n}" name="${n}" type="password" inputmode="numeric" autocomplete="off" value="">${h}`;
     return `<label for="f_${n}">${lbl}</label><input id="f_${n}" name="${n}" type="${t === 'date' ? 'date' : 'text'}" value="${esc(v)}">${h}`;
   }).join('');
-  const title = (id ? 'Edit ' : 'Add ') + sch.label;
+  const title = ['signin', 'code', 'notify'].includes(k) ? sch.label : (id ? 'Edit ' : 'Add ') + sch.label;
   const canDelete = id && ['song','member', ...KINDS].includes(k);
   return `<div class="modal" data-act="closeform"><div class="sheet" id="frm"><h2>${title}</h2>${f}${form.err ? `<div class="err" role="alert">${esc(form.err)}</div>` : ''}
-    <div class="row" style="margin-top:20px"><button class="btn" data-act="saveform" ${form.busy ? 'disabled' : ''}>${form.busy ? 'Saving...' : 'Save'}</button><button class="btn alt" data-act="closeform">Cancel</button>
+    <div class="row" style="margin-top:20px"><button class="btn" data-act="saveform" ${form.busy ? 'disabled' : ''}>${form.busy ? 'Working...' : ({signin:'Sign in', notify:'Send to all phones', code:'Change PIN'}[k] || 'Save')}</button><button class="btn alt" data-act="closeform">Cancel</button>
     ${canDelete ? `<button class="btn bad" data-act="delitem" style="margin-left:auto" ${form.busy ? 'disabled' : ''}>${form.sure ? 'Tap again to delete' : 'Delete'}</button>` : ''}</div></div></div>`;
 }
 
@@ -489,16 +581,17 @@ let lastTab = null;
 function render(){
   readLE();
   const key = tab + sunDate, y = window.scrollY, changed = lastTab !== key; lastTab = key;
-  const views = {sun:sunV, home:homeV, news:newsV, songs:songsV, rota:rotaV, rules:rulesV, att:attV};
+  const views = {admin:adminV, sun:sunV, home:homeV, news:newsV, songs:songsV, rota:rotaV, rules:rulesV, att:attV};
   const body = loading ? '<div class="empty">Loading...</div>' : (loadErr ? `<div class="empty">${esc(loadErr)}</div>` : views[tab]());
   const barL = tab === 'home'
     ? `<a class="brand" href="#" data-act="tab" data-v="home"><span class="logo">${ic('note', 2.4).replace('currentColor', '#e3b04b')}</span>${esc(CHOIR_NAME)}</a>`
     : tab === 'sun' ? `<button class="back" data-act="tab" data-v="rota" aria-label="Back to schedule">${ic('back', 2.6)}Schedule</button><h1>${TITLES[tab]}</h1>`
     : `<button class="back" data-act="tab" data-v="home" aria-label="Back to home">${ic('back', 2.6)}Home</button><h1>${TITLES[tab]}</h1>`;
-  $('#app').innerHTML = `<div class="top"><div class="wrap"><div class="bar">${barL}<button class="iconbtn" data-act="refresh" aria-label="Refresh">${ic('refresh')}</button></div>
-    <nav class="tabs" aria-label="Sections">${TABS.map(([k, l]) => `<button class="tab ${tab === k || (tab === 'sun' && k === 'rota') ? 'on' : ''}" data-act="tab" data-v="${k}" ${tab === k ? 'aria-current="page"' : ''}>${ic(k)}${l}</button>`).join('')}</nav></div></div>
+  const adm = editor ? `<button class="adminbtn on" data-act="tab" data-v="admin">${ic('admin')}Admin</button>` : `<button class="adminbtn" data-act="signin" aria-label="Admin sign-in">${ic('lock')}Admin</button>`;
+  $('#app').innerHTML = `<div class="top"><div class="wrap"><div class="bar">${barL}${adm}<button class="iconbtn" data-act="refresh" aria-label="Refresh">${ic('refresh')}</button></div>
+    <nav class="tabs" aria-label="Sections">${TABS.filter(([k]) => k !== 'att' || editor).map(([k, l]) => `<button class="tab ${tab === k || (tab === 'sun' && k === 'rota') ? 'on' : ''}" data-act="tab" data-v="${k}" ${tab === k ? 'aria-current="page"' : ''}>${ic(k)}${l}</button>`).join('')}</nav></div></div>
     <main class="wrap"><div class="${changed ? 'view' : ''}">${body}</div></main>
-    ${form ? formV() : ''}${toastMsg ? `<div class="toast" role="status">${esc(toastMsg)}</div>` : ''}`;
+    ${form ? formV() : ''}${guide ? guideV() : ''}${toastMsg ? `<div class="toast" role="status">${esc(toastMsg)}</div>` : ''}`;
   if (changed) { window.scrollTo(0, 0); const on = document.querySelector('.tab.on'); if (on) on.scrollIntoView({inline:'center', block:'nearest'}); }
   else window.scrollTo(0, y);
 }
@@ -510,6 +603,18 @@ async function copyText(t){
 
 async function doSave(v){
   const {c, id} = form;
+  if (c === 'signin') {
+    const ok = await rpc('verify_editor', {p_code: v.code});
+    if (ok !== true) throw new Error('That PIN did not work. Check it and try again.');
+    code = v.code; editor = true; store.set('choirCode', code); stats = null; return 'Signed in as admin';
+  }
+  if (c === 'code') {
+    await ed('editor_change_code', {p_new: v.new_code});
+    code = v.new_code; store.set('choirCode', code); return 'Admin PIN changed. Share it with the other admins.';
+  }
+  if (c === 'notify') { const r = await sendPush(v.title, v.body); loadStats(); return r; }
+  if (c === 'announcement' && v.notify) { const want = v.notify; delete v.notify; await ed('editor_save_item', {p_id: id || null, p_kind: c, p_data: v}); await load(); let msg = 'Saved'; if (want) { try { msg = 'Saved. ' + await sendPush(v.title, v.body || ''); } catch (e) { msg = 'Saved, but the notification failed: ' + e.message; } } return msg; }
+  if (c === 'announcement') delete v.notify;
   if (c === 'song') {
     if (v.youtube_url && !/^https:\/\/(www\.|m\.|music\.)?(youtube\.com|youtu\.be)\//i.test(v.youtube_url)) throw new Error('Use a full YouTube link starting with https://');
     const row = {title: v.title, type: v.type, musical_key: v.musical_key || null, notes: v.notes || null, youtube_url: v.youtube_url || null};
@@ -574,6 +679,12 @@ function onHash(){ lineEdit = null; tab = tabFromHash(); if (tab === 'att' && !r
 window.addEventListener('hashchange', onHash);
 
 const A = {
+  signin: () => { form = {c: 'signin'}; },
+  signout: () => { editor = false; code = ''; store.set('choirCode', ''); roster = null; stats = null; if (tab === 'att' || tab === 'admin') { goTab('home'); return 'skip'; } },
+  changecode: () => { form = {c: 'code'}; },
+  pushon: () => { pushOn(); return 'skip'; },
+  guide: () => { guide = true; },
+  closeguide: (d, t) => { guide = false; },
   le_start: (d, el) => { lineAct('le_start', el); return 'skip'; },
   tab: d => { goTab(d.v); return 'skip'; },
   refresh: () => { loading = true; render(); load(); if (roster) loadRoster(); return 'skip'; },
@@ -639,8 +750,11 @@ setInterval(() => { if (!document.hidden) load(); }, 90000);
   setTimeout(window.__splashDone, 4000);
 })();
 
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').then(async reg => {
+  try { if (pushSupported() && Notification.permission === 'granted') { const sub = await reg.pushManager.getSubscription(); if (sub) { await saveSub(sub); store.set('pushOn', '1'); } else store.set('pushOn', ''); } } catch (e) {}
+}).catch(() => {});
+if (code) rpc('verify_editor', {p_code: code}).then(ok => { editor = ok === true; if (!editor) { code = ''; store.set('choirCode', ''); } render(); }).catch(() => {});
 render();
-if (tab === 'att') loadRoster();
 load().then(() => window.__splashDone());
 </script>
 </body>
